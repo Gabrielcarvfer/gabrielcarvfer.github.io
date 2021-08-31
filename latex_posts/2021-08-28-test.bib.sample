@@ -1,0 +1,13 @@
+@Article{Gray1991,
+  author    = {Jim Gray and Dan P. Siewiorek},
+  title     = {High-availability computer systems},
+  journal   = {Computer},
+  year      = {1991},
+  volume    = {24},
+  number    = {9},
+  pages     = {39--48},
+  month     = {sep},
+  doi       = {10.1109/2.84898},
+  note      = {doi:10.1109/2.84898},
+  publisher = {Institute of Electrical and Electronics Engineers ({IEEE})},
+}

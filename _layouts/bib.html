@@ -55,7 +55,7 @@
                 {%- endif -%}
               {%- endfor -%}
             {%- endif -%}
-            
+
             {%- if forloop.length > 1 -%}
               {%- if forloop.first == false -%},&nbsp;{%- endif -%}
               {%- if forloop.last and author_array_limit == author_array_size -%}and&nbsp;{%- endif -%}
@@ -71,7 +71,7 @@
             {%- endif -%}
           {%- endfor -%}
           {%- assign more_authors = author_array_size | minus: author_array_limit -%}
-          
+
           {%- assign more_authors_hide = more_authors | append: " more author" -%}
           {%- if more_authors > 0 -%}
             {%- if more_authors > 1 -%}
@@ -125,7 +125,7 @@
             {{ periodical | strip }}
           </div>
         {%- endif %}
-        
+
           <!-- Links/Buttons -->
           <div class="links">
           {%- if entry.abstract %}
@@ -176,6 +176,9 @@
           {%- endif %}
           {%- if entry.website %}
             <a href="{{ entry.website }}" class="btn btn-sm z-depth-0" role="button">Website</a>
+          {%- endif %}
+          {%- if entry.doi %}
+            doi:<a href="http://dx.doi.org/{{entry.doi}}">{{entry.doi}}</a>
           {%- endif %}
           {%- if entry.altmetric %}
             <script type="text/javascript" src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script><div data-altmetric-id="{{ entry.altmetric }}" class="altmetric-embed" data-hide-no-mentions="true" data-hide-less-than="15" data-badge-popover="right" data-badge-type="2" style="display:inline"></div>
