@@ -188,7 +188,7 @@ scholar:
   last_name: Ferreira
   first_name: [Gabriel, C.]
 
-  style: bestpapers
+  style: ACM-Reference-Format
   locale: en
 
   source: /_bibliography/
