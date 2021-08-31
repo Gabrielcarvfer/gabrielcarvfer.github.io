@@ -30,7 +30,16 @@ re_match_html_author = re.compile("""meta name="author" content="(.*)" />""")
 re_match_html_title = re.compile("""<title>(.*)</title>""")
 
 
-def latex_to_html_via_pandoc(source_file, source_dir="latex_posts", target_dir="_posts"):
+def latex_to_html_via_pandoc(source_file):
+    # Get source file directory path
+    source_dir = os.path.dirname(source_file)
+
+    # Split the content type from it, determine the target directory path and layout type
+    content_type = os.path.basename(source_dir)
+    target_dir = "_%s" % content_type
+    layout = "post" if content_type in ["posts", "news"] else "page"
+
+    # Path to the output file
     output_file = source_file.replace(".tex", ".html").replace(source_dir, target_dir)
 
     # Latex to html
@@ -70,10 +79,13 @@ def latex_to_html_via_pandoc(source_file, source_dir="latex_posts", target_dir="
         contents = contents.split("</header>")[1]
         contents = contents.split("</body>")[0]
 
+        # Inline post if news
+        is_inline = "inline: true\n" if content_type == "news" and len(contents) < 100 else ""
+
     # Rewrite file with markdown header
     with open(output_file, "w", encoding="utf-8") as f:
         # Write markdown header
-        f.write("""---\nlayout: post\nauthor: "%s"\ntitle: "%s"\n---""" % (author, title))
+        f.write("""---\nlayout: %s\nauthor: "%s"\ntitle: "%s"\n%s---""" % (layout, author, title, is_inline))
 
         # Write stripped down html
         f.write(contents)
@@ -85,11 +97,18 @@ def main():
                         help='use "--serve True" to start the jekyll development server after processing files', )
     args = parser.parse_args()
 
+    if not os.path.exists("latex"):
+        print("No latex files to parse")
+        exit(0)
+
     # Scan for tex files
-    for post in os.scandir("latex_posts"):
-        if post.name.endswith(".tex"):
-            # Process them
-            executor.submit(latex_to_html_via_pandoc, post.path)
+    for content_type in os.scandir("latex"):
+        target_dir = "_%s" % content_type.name
+        os.makedirs(target_dir, exist_ok=True)
+        for content in os.scandir("latex/%s" % content_type.name):
+            if content.name.endswith(".tex"):
+                # Process them
+                executor.submit(latex_to_html_via_pandoc, content.path)
 
     # Run jekyll to rebuild the site
     if not args.serve:
