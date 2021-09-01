@@ -57,7 +57,7 @@ A.k.a. the worst-case scenario for HDDs.
 
 By scanning first and processing later, we drastically reduced thread wait times.
 
-![](/assets/img/2020-12-17-picard-the-captain-of-the-starfleet/picard_threading_profiling.png)
+<img src="/assets/img/2020-12-17-picard-the-captain-of-the-starfleet/picard_threading_profiling.png" alt="drawing" width="100%"/>
 
 And then we hit the second major breakthrough:
 
