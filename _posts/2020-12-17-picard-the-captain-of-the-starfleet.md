@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 'Warp-speeding the captain of the Starfleet - MusicBrainz Picard performance optimizations'
+title: 'Warp-speeding the captain of the Starfleet'
 categories: MetaBrainz
 ---
 
