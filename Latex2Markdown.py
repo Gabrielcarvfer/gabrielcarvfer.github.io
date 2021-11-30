@@ -93,7 +93,7 @@ def latex_to_html_via_pandoc(source_file):
 
 def main():
     parser = argparse.ArgumentParser(description='Produce Jekyll posts from LaTeX sources.')
-    parser.add_argument('--serve', type=bool, default=False,
+    parser.add_argument('--serve', action="store_true", default=False,
                         help='use "--serve True" to start the jekyll development server after processing files', )
     args = parser.parse_args()
 
@@ -114,7 +114,7 @@ def main():
     if not args.serve:
         subprocess.check_output("bundle exec jekyll build".split(" "))
     else:
-        subprocess.check_output("jekyll serve".split(" "))
+        subprocess.check_output("bundle exec jekyll serve".split(" "))
     print("We are done here")
 
 

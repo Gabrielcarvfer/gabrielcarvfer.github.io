@@ -1,0 +1,324 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\title{ns-3 transition from waf to CMake}
+\author{Gabriel}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\end{abstract}
+
+\section*{Introduction}
+    The ns-3 network simulator is one of the most used network simulators in the academia,
+    however, it has a very steep learning curve, especially when you are still learning C++ and the standards themselves.
+
+    Not their fault in any way, it is just that modeling complex systems is hard by itself.
+
+    Ever-evolving standards, adding more and more features as the time goes while keeping backwards compatibility
+    also doesn't help.
+
+    What can we do to help?
+
+    Better guides? Maybe, but I do not think they help as much. If it was something interactive,
+    it could be pretty cool.
+    I have tried setting up Jupyter notebooks for more interactive guides using the power
+    of \href{https://github.com/jupyter-xeus/xeus-cling}{Cling-Xeus}.
+
+    Better examples? Maybe. Some examples are very simple while we have much more complicated scenarios
+    in published papers.
+
+    Better docs? I personally don't think they help as much when you're already lost.
+
+    Maybe include a parser to be able to describe the simulations from a higher level description language
+    like other simulators do?
+    That does not sound like a bad idea, since setting up some things can be quite complicated if you are just getting
+    started.
+
+    Better tooling? This is where I come in.
+
+\section*{Build systems}
+    Something so simple as a build system should not be such a problem, am I right? Well, it is not if you already know
+    what you are doing, how to get things done, etc.
+
+    If you are part of the group just getting started into everything at once, it is overwhelming and your productivity
+    is basically none for a while, which can be frustrating. I was one of these.
+
+    So, how bad can it really be? Well, pretty bad. Since I have been used to IDEs, where projects can be organized
+    neatly, settings are managed graphically, auto-completion works, coding mistakes are properly highlighted, you can
+    easily navigate and refactor the code and my preferred feature: VISUAL DEBUGGING.
+
+    \begin{figure}
+        \includegraphics[width=1.0\textwidth,height=\textheight]{"/assets/img/2021-11-29-ns3-waf-to-cmake-transition/visual\_debugging.png"}
+    \end{figure}
+
+    Yes, I like visual debuggers. Really like them. For a few reasons, being the following two the main ones:
+
+    \begin{itemize}
+        \item I can see the values of the variables not only in the memory watches panels, but inlined into the code
+        \item I can see the callstack
+    \end{itemize}
+
+    But you may ask me: \textit{-What the devil build systems got to do with visual debugging?}.
+
+    And that is a pretty good question. While build systems do not prevent you from using visual debuggers, it limits
+    the amount of information and insights you can get from the code.
+    Some IDEs, for example, do not even allow for that.
+
+    Why all of this matters? \href{https://waf.io/}{\textbf{WAF}}.
+
+    Waf is a pretty cool build system written entirely in Python and is supper easy to distribute with your project,
+    so it needs only Python installed (which you would probably already have anyways) and whatever your project needs
+    to get build (e.g. compiler).
+
+    ns-3 have been using Waf for a while, and it has been working well for quite a long time, which goes to show it is
+    not a bad build system in any way.
+
+    My grudges with Waf is just that it does not support IDEs and the organization in different steps, plus how
+    things are organized seem overly complicated for me. What I dislike the most however is that it does not produce
+    intermediary build system files that I can inspect visually and discover what I am doing wrong.
+
+    So I started working on CMake support...
+
+\section*{ns-3 with CMake}
+    Since I started my masters, my advisor said I should start working with ns-3. If it was not for that, I would
+    probably be using ns-2 or OMNET++.
+
+    Anyways, so I started rewriting everything ns-3 needed on CMake. Took quite some time to write everything, since
+    I was not only translating Waf, but "reverse engineering". I admit was pretty stupid, but I simply could not
+    understand how Waf did its magic (if it had written makefiles or something like that, it would have been easier
+    and faster).
+
+    Since 2018 I have been gathering feedback and refactoring everything to
+    \href{https://gitlab.com/nsnam/ns-3-dev/-/merge_requests/460}{upstream that support}, which seems like
+    it is going to happen soon (release 3.36).
+
+    With CMake, all major IDEs are supported from the get go: Microsoft
+    \href{https://gabrielcarvfer.github.io/NS3/installation/visualstudio}{Visual Studio} and
+    \href{https://gabrielcarvfer.github.io/NS3/installation/visualcode}{Visual Code},
+    \href{https://gabrielcarvfer.github.io/NS3/installation/clion}{Jetbrains CLion},
+    \href{https://gabrielcarvfer.github.io/NS3/installation/xcode}{Apple XCode},
+    \href{https://gabrielcarvfer.github.io/NS3/installation/codeblocks}{Code::Blocks},
+    \href{https://gabrielcarvfer.github.io/NS3/installation/eclipse}{Eclipse},
+    CodeLite and others.
+
+    Of course CMake can also be called directly via
+    \href{https://gabrielcarvfer.github.io/NS3/installation/terminal}{the command-line}, but commands are very verbose.
+
+    Command-line users will be happy to know they were not forgotten with the
+    \href{https://gabrielcarvfer.github.io/NS3/installation/ns3waf}{ns3} wrapper script for CMake
+    (previously known as fakewaf and ns3waf).
+    The script provides pretty much the same functionality expected from Waf, including exporting library paths, making
+    programs just work instead of having to export the path first.
+
+    \textbf{My suggestion}: use the ns3 wrapper when you need it. For example, when using IDEs that do not natively
+    support CMake projects such as Xcode, Code::Blocks and Eclipse, you will need to specify the proper CMake
+    Generator to get a project for them. Also, you will need to close the IDE, refresh the CMake cache manually
+    (re-run 'ns3 configure') whenever you add/remove a source file, create a new module or add a new dependency
+    (either module or library), then you can open the IDE once again and continue using. I know it is pretty bad and
+    that is why I suggest either CLion (my preferred IDE) or VsCode, which works surprisingly well with CMake.
+
+
+
+\subsection*{What changes for a module developer?}
+    Not that much. I have purposefully made it very similar to make the transition as smooth as possible.
+    Copy and paste source lists to the appropriate variables, then clean semicolons and quotes and you are good to go
+    if your module does not have any special needs (e.g. external library or options).
+
+    \begin{figure}
+        \includegraphics[width=1.0\textwidth,height=\textheight]{"/assets/img/2021-11-29-ns3-waf-to-cmake-transition/modules\_transition.png"}
+    \end{figure}
+
+    If you need user-provided paths to look for libraries, you can follow example from the brite:
+
+    \begin{verbatim}
+    # This part is similar the conf part in a wscript
+    # I know it is pretty confusing, but this is due to CMake limitations
+    #
+    # First we declare/set a variable that points to a PATH in the CMake CACHE
+    #    (a.k.a. this value won't be lost accross runs)
+    # Then we declare/set a variable also stored in the cache,
+    #    but now it is used INTERNALly by us to determine if BRITE was
+    #    found in the NS3_WITH_BRITE path
+    set(NS3_WITH_BRITE "" CACHE PATH "Build with brite support")
+    set(NS3_BRITE "OFF" CACHE INTERNAL "ON if Brite is found in NS3_WITH_BRITE")
+
+    # If a path for Brite was not given, we just skip the entire module
+    #     and pretend it does not exist
+    if(NOT NS3_WITH_BRITE)
+      return()
+    endif()
+
+    # If a path for Brite was given, we search for both the library and
+    #     the header in the NS3_WITH_BRITE folder
+    find_library(brite_dep brite
+                 PATHS ${NS3_WITH_BRITE}
+                 PATH_SUFFIXES /build /build/lib /lib
+                 )
+    find_file(brite_header Brite.h
+              HINTS ${NS3_WITH_BRITE}
+              PATH_SUFFIXES /build /build/include /include
+              )
+
+    # If both are not found, we return a message indicating it is the
+    #     case and stop processing this module by returning to the src folder
+    if(NOT (brite_dep AND brite_header))
+      message(STATUS "Brite was not found in ${NS3_WITH_BRITE}")
+      return()
+    endif()
+
+    # If both were found, we get the directory containing
+    #     the brite header and use it as an include folder
+    get_filename_component(brite_include_folder ${brite_header} DIRECTORY)
+    include_directories(${brite_include_folder})
+
+    # We also set the NS3_BRITE variable, indicating it was found
+    set(NS3_BRITE "ON" CACHE INTERNAL "ON if Brite is found in NS3_WITH_BRITE")
+
+    # your module name (in this case brite, which can be used by other libraries
+    #    including ${libbrite} in their libraries_to_link variable)
+    set(name brite)
+
+    # your source files
+    set(source_files helper/brite-topology-helper.cc)
+
+    # your header files
+    set(header_files helper/brite-topology-helper.h)
+
+    # link to dependencies
+    set(libraries_to_link
+            ${libnetwork} # notice the ns-3 modules required by libbrite
+            ${libcore}
+            ${libinternet}
+            ${libpoint-to-point}
+            ${brite_dep} # notice the brite_dep library
+            )
+
+    # your test source files
+    set(test_sources test/brite-test-topology.cc)
+
+    # The magic macro that does Waf-like magic
+    build_lib("${name}"
+              "${source_files}"
+              "${header_files}"
+              "${libraries_to_link}"
+              "${test_sources}"
+              )
+    \end{verbatim}
+
+    If you need to find a library with a FindPackage(), the config-store module serves as an example:
+    \begin{verbatim}
+
+    # Search for HarfBuzz and GTK3
+    #     (we currently do this in ns-3-dev/buildsupport/macros_and_definitions.cmake)
+
+    # Only check for GTK3 if the user set this flag
+    #     (currently in ns-3-dev/CMakeLists.txt)
+    if(${NS3_GTK3})
+      find_package(HarfBuzz QUIET)
+      if(NOT ${HarfBuzz_FOUND})
+        message(STATUS "Harfbuzz is required by GTK3 and was not found.")
+      else()
+        set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 1 CACHE BOOL "")
+        find_package(GTK3 QUIET)
+        unset(CMAKE_SUPPRESS_DEVELOPER_WARNINGS CACHE)
+        if(NOT ${GTK3_FOUND})
+          message(STATUS "GTK3 was not found. Continuing without it.")
+        else()
+          message(STATUS "GTK3 was found.")
+        endif()
+      endif()
+    endif()
+
+    # Search for LibXml2
+    #     we currently do this in buildsupport/macros_and_definitions.cmake)
+    find_package(LibXml2 QUIET)
+    if(NOT ${LIBXML2_FOUND})
+      message(STATUS "LibXml2 was not found. Continuing without it.")
+    else()
+      message(STATUS "LibXml2 was found.")
+      add_definitions(-DHAVE_LIBXML2)
+    endif()
+
+    set(name config-store)
+
+    # add optional sources if an optional GTK3 dependency is found
+    if(${GTK3_FOUND})
+      set(gtk3_sources model/display-functions.cc
+                       model/gtk-config-store.cc
+                       model/model-node-creator.cc
+                       model/model-typeid-creator.cc
+      )
+
+      set(gtk3_headers model/gtk-config-store.h)
+      include_directories(${GTK3_INCLUDE_DIRS} ${HarfBuzz_INCLUDE_DIRS})
+      set(gtk_libraries ${GTK3_LIBRARIES})
+    endif()
+
+    # add optional sources if an optional LibXml2 dependency is found
+    if(${LIBXML2_FOUND})
+      set(xml2_sources model/xml-config.cc)
+      set(xml2_libraries ${LIBXML2_LIBRARIES})
+      include_directories(${LIBXML2_INCLUDE_DIR})
+    endif()
+
+    # add optional sources to the source_files list
+    set(source_files
+        ${gtk3_sources}
+        ${xml2_sources}
+        model/attribute-default-iterator.cc
+        model/attribute-iterator.cc
+        model/config-store.cc
+        model/file-config.cc
+        model/raw-text-config.cc
+    )
+
+    # add optional header to the header_files list
+    set(header_files ${gtk3_headers} model/file-config.h model/config-store.h)
+
+    # add optional libraries to the libraries_to_link list
+    set(libraries_to_link ${libcore} ${libnetwork} ${xml2_libraries} ${gtk_libraries})
+
+    set(test_sources)
+
+    build_lib("${name}"
+              "${source_files}"
+              "${header_files}"
+              "${libraries_to_link}"
+              "${test_sources}"
+              )
+
+    \end{verbatim}
+
+    You may ask: \textit{-Is there yet another way of finding libraries?}.
+    And the answer could not be other than: of course there is.
+
+    For libraries that use pkg-config, you can follow the fd-net-device example.
+    \begin{verbatim}
+    # Include CMake script to use pkg-config
+    include(FindPkgConfig)
+    # If pkg-config was found, search for dpdk
+    if(PKG_CONFIG_FOUND)
+      pkg_check_modules(DPDK libdpdk)
+    endif()
+    ...
+    # Reset cached variable
+    set(ENABLE_DPDKDEVNET False CACHE INTERNAL "")
+    ...
+    # Set cached variable if both pkg-config and libdpdk are found
+    if(PKG_CONFIG_FOUND AND DPDK_FOUND)
+      set(ENABLE_DPDKDEVNET True CACHE INTERNAL "")
+    endif()
+    \end{verbatim}
+
+
+\section*{The end}
+    Feel free to provide feedback either on the \href{https://groups.google.com/g/ns-3-users}{ns-3-users group},
+    via the \href{https://gitlab.com/nsnam/ns-3-dev/-/merge_requests/460}{open MR}.
+
+    You can also find me on the \href{https://ns-3.zulipchat.com/}{ns-3 Zulip}.
+
+
+\end{document}
