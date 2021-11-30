@@ -11,7 +11,7 @@
   Gabriel C. Ferreira
 
 
-  | blog
+  | projects
 
 </title>
 <meta name="description" content="A bunch of random stuff
@@ -37,7 +37,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤌</text></svg>">
 
 <link rel="stylesheet" href="/assets/css/main.css">
-<link rel="canonical" href="/blog/">
+<link rel="canonical" href="/projects/">
 
 <!-- JQuery -->
 <!-- jQuery -->
@@ -122,11 +122,9 @@
           </li>
           
           <!-- Blog -->
-          <li class="nav-item active">
+          <li class="nav-item ">
             <a class="nav-link" href="/blog/">
               blog
-              
-              <span class="sr-only">(current)</span>
               
             </a>
           </li>
@@ -150,9 +148,11 @@
           
           
           
-          <li class="nav-item ">
+          <li class="nav-item active">
               <a class="nav-link" href="/projects/">
                 projects
+                
+                <span class="sr-only">(current)</span>
                 
               </a>
           </li>
@@ -191,36 +191,170 @@
     <div class="container mt-5">
       <div class="post">
 
-  <div class="header-bar">
-    <h2>Random blogging</h2>
-    <h3></h3>
-  </div>
+  <header class="post-header">
+    <h1 class="post-title">projects</h1>
+    <p class="post-description">Some of the cool stuff I have worked on over the years.</p>
+  </header>
 
+  <article>
+    <div class="projects">
+  
+  <!-- Display categorized projects -->
+    
+      <h2 class="category">work</h2>
+      
+      
+      <!-- Generate cards for each project -->
+      
+        <div class="container">
+          <div class="row row-cols-2">
+          
+            <div class="card-item col">
+  
+  <a href="https://gabrielcarvfer.github.io/NS3/COLAB/" target="_blank">
+  
+    <div class="card hoverable">
+      <div class="row g-0">
+        
+        <div class="col-md-12">
+        
+          <div class="card-body">
+            <h3 class="card-title text-lowercase">COLAB</h3>
+            <p class="card-text">A tool for developing collaborative spectrum sensing on ns-3</p>
+            <div class="row ml-1 mr-1 p-0">
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </a>
+</div>
 
-  <ul class="post-list">
+          
+            <div class="card-item col">
+  
+  <a href="https://gabrielcarvfer.github.io/NS3/COLAB_5G/" target="_blank">
+  
+    <div class="card hoverable">
+      <div class="row g-0">
+        
+        <div class="col-md-12">
+        
+          <div class="card-body">
+            <h3 class="card-title text-lowercase">COLAB-5G</h3>
+            <p class="card-text">A tool for simulating networks based of the 5G-RANGE project, with additional collaborative spectrum sensing techniques and mitigations for Byzantine attacks</p>
+            <div class="row ml-1 mr-1 p-0">
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </a>
+</div>
+
+          
+            <div class="card-item col">
+  
+  <a href="https://gabrielcarvfer.github.io/NS3/" target="_blank">
+  
+    <div class="card hoverable">
+      <div class="row g-0">
+        
+        <div class="card-img col-md-6">
+          <img src="/assets/img/ns3_cmake.png" alt="project thumbnail" />
+        </div>
+        <div class="col-md-6">
+        
+          <div class="card-body">
+            <h3 class="card-title text-lowercase">ns-3 with CMake</h3>
+            <p class="card-text">CMake buildsystem support the ns-3 network simulator</p>
+            <div class="row ml-1 mr-1 p-0">
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </a>
+</div>
+
+          
+          </div>
+        </div>
+      
     
-      <li>
-        <h4><a class="post-title" href="/2021/11/29/ns3-waf-to-cmake-transition.html">ns-3 transition from waf to CMake</a></h4>
-        <p class="post-meta">November 29, 2021</p>
-        <p></p>
-      </li>
+      <h2 class="category">fun</h2>
+      
+      
+      <!-- Generate cards for each project -->
+      
+        <div class="container">
+          <div class="row row-cols-2">
+          
+            <div class="card-item col">
+  
+  <a href="https://github.com/metabrainz/picard/commits?author=Gabrielcarvfer" target="_blank">
+  
+    <div class="card hoverable">
+      <div class="row g-0">
+        
+        <div class="card-img col-md-6">
+          <img src="/assets/img/mb_picard.png" alt="project thumbnail" />
+        </div>
+        <div class="col-md-6">
+        
+          <div class="card-body">
+            <h3 class="card-title text-lowercase">Picard</h3>
+            <p class="card-text">Contributing performance optimizations, AcousticBrainz integration and smaller stuff to the MusicBrainz Picard</p>
+            <div class="row ml-1 mr-1 p-0">
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </a>
+</div>
+
+          
+            <div class="card-item col">
+  
+  <a href="https://gitlab.com/nsnam/ns-3-dev" target="_blank">
+  
+    <div class="card hoverable">
+      <div class="row g-0">
+        
+        <div class="card-img col-md-6">
+          <img src="/assets/img/nsnam_ns3.png" alt="project thumbnail" />
+        </div>
+        <div class="col-md-6">
+        
+          <div class="card-body">
+            <h3 class="card-title text-lowercase">ns-3</h3>
+            <p class="card-text">Contributing performance optimizations, performance profiling and trying to upstream CMake and MinGW support</p>
+            <div class="row ml-1 mr-1 p-0">
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </a>
+</div>
+
+          
+          </div>
+        </div>
+      
     
-      <li>
-        <h4><a class="post-title" href="/2021/08/30/blogging-with-latex.html">Blogging with LaTeX</a></h4>
-        <p class="post-meta">August 30, 2021</p>
-        <p></p>
-      </li>
-    
-      <li>
-        <h4><a class="post-title" href="/metabrainz/2020/12/17/picard-the-captain-of-the-starfleet.html">Warp-speeding the captain of the Starfleet</a></h4>
-        <p class="post-meta">December 17, 2020</p>
-        <p></p>
-      </li>
-    
-  </ul>
 
   
 
+</div>
+
+  </article>
 
 </div>
 
