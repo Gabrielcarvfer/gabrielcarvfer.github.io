@@ -79,6 +79,10 @@ def latex_to_html_via_pandoc(source_file):
         contents = contents.split("</header>")[1]
         contents = contents.split("</body>")[0]
 
+        # Wrap {{, }} with raw tags since it breaks liquid parsing
+        contents = contents.replace("{{","{% raw %}{{")
+        contents = contents.replace("}}","}}{% endraw %}")
+
         # Inline post if news
         is_inline = "inline: true\n" if content_type == "news" and len(contents) < 100 else ""
 
@@ -89,6 +93,7 @@ def latex_to_html_via_pandoc(source_file):
 
         # Write stripped down html
         f.write(contents)
+
 
 
 def main():

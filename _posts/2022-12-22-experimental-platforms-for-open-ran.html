@@ -1,0 +1,243 @@
+---
+layout: post
+author: "Gabriel"
+title: "Open RAN and the challenges in experimentation with open-source platforms"
+---
+<h1 data-number="1" id="introduction"><span class="header-section-number">1</span> Introduction</h1>
+<p>The Open RAN (O-RAN) architecture and the O-RAN Alliance specifications have the potential to promote virtualized and disaggregated Radio Access Networks (RANs), connected through open interfaces and optimized by intelligent controllers.</p>
+<p>Understanding the O-RAN architecture, interfaces and workflows is critical to the future of the telecommunications ecosystem. The evolution of O-RAN has many challenges due to its complexity, requiring experimental platforms to evaluate programmable and virtualized protocol stacks with the new open interfaces, in conjunction with RAN optimization within the 5G architecture and beyond.</p>
+<p>Our team at UnB spent quite some time looking for different platforms for experimentation and presented our findings, <span class="citation" data-cites="Solis_2022">(Solis et al. 2022)</span>, at the Brazilian Symposium of Telecommunications (SBRT2022).</p>
+<p>Since I didn’t have any free time up till now and we didn’t have enough space in the paper, lets review things here, were we can put any number of images.</p>
+<h1 data-number="2" id="what-do-we-need-to-get-a-working-open-ran-setup"><span class="header-section-number">2</span> What do we need to get a working Open-RAN setup?</h1>
+<p>It isn’t an official architecture diagram, but the diagram of the reference implementation made by the <a href="https://wiki.o-ran-sc.org/display/OAM/OAM+Architecture#OAMArchitecture-IntegrationintoSMO">O-RAN Software Community (O-RAN SC)</a>.architecture Figure <a href="#fig:o-ran-sc-architecture" data-reference-type="ref" data-reference="fig:o-ran-sc-architecture">1</a> shows the main components of an O-RAN setup, which are:</p>
+<ol>
+<li><p>the 3GPP core: 4G and 5G are supported in the O-RAN specifications (some companies are apparently adapting older networks too)</p></li>
+<li><p>the RAN components: the eNB or gNB, or its disaggregated counterparts (CU, DU, RU)</p></li>
+<li><p>the O-RAN components: near-RT RIC, non-RT RIC and the rest of the SMO, plus SDK for xApp/rApp development</p></li>
+</ol>
+<figure>
+<img src="/assets/img/2022-12-22-experimental-platforms-for-open-ran/o-ran-sc-architecture.png" id="fig:o-ran-sc-architecture" style="width:100.0%" alt="" /><figcaption>Architecture diagram of the reference O-RAN implementation (the drawings are mine)</figcaption>
+</figure>
+<p>Let’s look at each components alternatives.</p>
+<h2 data-number="2.1" id="g-core-implementations"><span class="header-section-number">2.1</span> 5G Core implementations</h2>
+<p>We found two open-source implementations that are frequently used. The first one is the famous <a href="https://openairinterface.org/oai-5g-core-network-project/">OpenAirInterface-5G Core Network (OAI-5G CN)</a>, which has been in the works for years and is used by a lot of researchers and companies, in both private and public networks.</p>
+<p>The second one is the <a href="https://www.free5gc.org/">free5gc</a>, which started as a fork of a 4G Core, <a href="https://nextepc.org/">NextEPC</a>, and continues to evolve. Also seems to be used on public networks.</p>
+<p>There are quite a lot of proprietary cores, but we can’t be certain those are not forks of the open-source ones. To name a few companies and their cores:</p>
+<ul>
+<li><p><a href="https://www.ericsson.com/en/core-network/5g-core">Ericsson - 5GC</a></p></li>
+<li><p><a href="https://www.nokia.com/networks/core/5g-core/">Nokia - 5GC</a></p></li>
+<li><p><a href="https://www.tecore.com/core-network-products/">Tecore – iCore</a></p></li>
+<li><p><a href="https://capgemini-engineering.com/us/en/brochure/virtualized-next-generation-5g-core/">Altran/Capgemini Engineering - Virtualized Next Generation 5G Core (ViNGC)</a></p></li>
+<li><p><a href="https://www.mavenir.com/portfolio/mavcore/">Mavenir – Mavenir Converged Package Core (MAVCore)</a></p></li>
+<li><p><a href="https://carrier.huawei.com/en/products/core-network/sdm">Huawei – SDM/PCC</a></p></li>
+</ul>
+<p>After we have a 3GPP core, we can then connect it to our RAN.</p>
+<h2 data-number="2.2" id="ran-implementations"><span class="header-section-number">2.2</span> RAN implementations</h2>
+<p>Most likely due to complexity, performance issues due to signal processing overhead, and standards conformance and interoperability testing, there seems to be less options in terms of RAN.</p>
+<p>The eNB/gNB/CU/DU are available in open-source projects such as:</p>
+<ul>
+<li><p><a href="https://openairinterface.org">OpenAirInterface</a></p></li>
+<li><p><a href="https://www.srsran.com/">SrsRAN</a></p></li>
+<li><p>Radisys – gNB DU (part of the reference O-RAN SC implementation)</p></li>
+</ul>
+<p>The O-RAN RICs and interfaces are available in open-source projects such as:</p>
+<ul>
+<li><p><a href="https://openairinterface.org/mosaic5g/">OAI - FlexRic</a></p></li>
+<li><p><a href="https://opennetworking.org/open-ran/">Open Networking Foundation (ONF) - SD-RAN</a></p></li>
+</ul>
+<p>Other proprietary RAN implementations available:</p>
+<ul>
+<li><p>Radisys – ConnectRAN</p></li>
+<li><p>Huawei – SingleRAN</p></li>
+<li><p>Ericsson – Cloud RAN</p></li>
+<li><p>Nokia – AirScale Cloud RAN</p></li>
+</ul>
+<p>And it is at this point someone asks me why I included Huawei in this list. The answer is: they can probably adapt their solution easily to support Open-RAN. As the time goes by, it will get even easier since all the tooling required for testing and conformance will be in place. If O-RAN really works and is set as a requirement in new spectrum auctions, they will certainly do it.</p>
+<h2 data-number="2.3" id="orchestration-and-management-om-services"><span class="header-section-number">2.3</span> Orchestration and management (O&amp;M) services</h2>
+<p>This is where things really start to get big and ugly.</p>
+<p>We have great O&amp;M services such as <a href="https://magmacore.org/">Magma</a>, which was started by Facebook, then moved to <a href="https://telecominfraproject.com/">Telecom Infrastructure Project (TIP)</a>, and finally to Linux Foundation (stop moving the damned project around).</p>
+<p>Too bad it isn’t comparible with O-RAN. Even then, it probably is one of the reasons O-RAN even became a thing, since TIP is also responsible for pushing O-RAN forward, along with Telcos, software/hardware/cloud partners and some governments.</p>
+<p>There is also <a href="https://osm.etsi.org/">Open-Source MANO</a>, which doesn’t really seem to have gained much traction on the O-RAN space. But maybe I’m badly informed.</p>
+<p><a href="https://kubernetes.io/">Kubernetes</a> on the other hand, seems to be the popular choice, since both <a href="https://openairinterface.org/mosaic5g/">Trirematics</a>, OAI’s O&amp;M solution, and the <a href="https://opennetworking.org/open-ran/">SD-RAN</a>, ONF’s O&amp;M solution, are based on Kubernetes.</p>
+<p>All of the services are implemented as Virtualized Network Functions (VNFs), that are executed within containers. The containers are glued together by software defined networks (SDNs). SD-RAN uses ONF’s in-house SDN/NFV solution named <a href="https://opennetworking.org/onos/">ONOS</a>, while the reference O-RAN implementation uses Linux Foundation’s <a href="https://www.onap.org/">Open Network Automation Platform (ONAP)</a>.</p>
+<h2 data-number="2.4" id="a-blueprint"><span class="header-section-number">2.4</span> A blueprint</h2>
+<p>With all components at hand, we then need to sewn them together.</p>
+<p>This is when the problems really start appearing for a novice.</p>
+<p>There are quite a lot of components, all of them with different configuration settings, syntaxes and semantics. You have no idea what most of the settinds do and how to properly set them up, but you’re still supposed to figure it out...</p>
+<p>You probably won’t, because available documentation is pretty bad. I admit my documentation isn’t up to par either, but that’s how things are.</p>
+<p>We are supposed to believe <a href="https://wiki.akraino.org/">Akraino</a> blueprints work, but I haven’t got a single one to work. Seems like another dead project from the Linux’s Foundation.</p>
+<p>ONF is the most friendly one, with a complete and working blueprint, which they named <a href="https://docs.sd-ran.org/master/sdran-in-a-box/README.html">SD-RAN-in-a-box</a> , or just Riab.</p>
+<h1 data-number="3" id="sd-ran-in-a-box-a-not-so-hidden-gem"><span class="header-section-number">3</span> SD-RAN-in-a-box: a not so hidden gem</h1>
+<p>By far, SD-RAN-in-a-box is the most user-friendly Open-RAN solution.</p>
+<p>You just run a few commands and it setups everything up using the magic of good old Bash, Ansible, Kubernetes and ONOS.</p>
+<p>The user can select if they want to emulate the user data-plane. Which of course we want.</p>
+<p>It will create VM’s running OAI that act like the eNB and UE, connected by a virtual channel.</p>
+<p>More surprisingly, since OAI is already running anyways, the user can choose to use a Software Defined Radio (SDR) to get a real network going.</p>
+<p>Of course the settings are meant for a lab setup, with very few UEs.</p>
+<p>There is a popular saying that says that the devil is in the details. I’d say that the devil is in the implementations. While the O-RAN standard look fairly simple, the implementation complexity can vary wildly depending on the implementer choices.</p>
+<p>When I found SD-RAN-in-a-box, I started looking at the settings to understand how exactly it worked, what was connected to what, which standard defined the different interfaces.</p>
+<p>Ended up writing a MermaidJS diagram. But since is too big to show, here is the <a href="https://mermaid-js.github.io/mermaid-live-editor/edit#pako:eNqdWftvozgQ_lesnFa605VNeGS77f2U5tHNbQsRCdKe6GlFwU1RiUE8uu1t93-_8YPEEJISIiUQz_fZ4xnPeDA_e34c4N5lb516ySNaTe4Igs-HD2iJ0-fQx-jWI94abzDJkUcCZKX-I87y1MvDmCA_3iQxAVnGeVlxzzta3lq8pdJqLZdXy6Vb7YP2Kg0ixs3Qv7sO6McyreX4Zu7SK4KbfkziTPGjsAl47Qgg3HDgutgDfnWuprY5XU2X7tfiHqcE5zAsVcePSe6FBKeNWliLqT1aWTYfwUowTCRO-TCx-NfEW9jWt384aZHGL6-ckdDbOjzLXyNcThk9hFF0-dswuD9XjUM4mOi7uN2EW3VZzrMVmE3uCFLMRVEUSYtGx1UghzwGoDfJaaPFHL3JOh_2GmWOkmTrN85j6ldJUUielmx-A5hnGj_hcmZn_K_yIwzyx8th8vLXIabamal1ZuonMDEJ7sjuL0Ttd0tdufCVVyRr1qBZY807AaSJkOQ4ffBowHopRiTOYXiIIS8Nwv9wcIY834_hnqxRHleYlmKPTGTGRLFXyJ6PL9GsID5NCV6ERpAiwhz7eQGdqh8H6o5aWQS2ujogEXM5JtUk6c5-xgn227GGnVifWrBqBi8N5hE0B9tHUbimaXMMKSuNowinDXnXtOwVWNjdGbuecATi-wi8P6p6n37AzK6935xCIKku--0ncRT6r2izy-SZ2EEaSBojaX1M0tB_ZOiQPMTphm8JDQydMfT-7Q3awI4VyQNV1qQw0ziOILZ3-xPyMlSQAKcowM84ihPGBEh9xTYlODr195Igm5BAzWbGQL04hNKPoGAkmqBsFb1JLjmIYaY_KtWOSvW65XZL87xzAvrcmXnRPdEOTs16lZta9WJBZoJMMXPMsQv7BOGZCuc_4vRpm6UqtQENTOylio0hea3CDaZB1hCJIg4ZdC8QRfDxusBTc1k2hfwLXy7DWkUmUraoiGLyEK5lsTM151euM1XgwjEFJuG9DFlZC8tNFWjlgDxOYln-wgKd_XLAUxJuqoH6wsKa_XJImm3qcp3JdS7fPO4NYTC5IeTRfV0-ZPKhKJz8SkUnhQvb4tX-3xlo-Bx66EueJ-itEkdid6BIS-1_g6xCgeDzsWXOoCSQsdv6gKLnBJJFFGXgEMRLtywMsO-lOexvrDEOMvQ21WodyOXHCqwbxevXXQ0CPSXe2qOlTF4K_UePrKGBKra2F2P0Rr0kB6y0_HeFxsO5Gtxr7bYfVetG0zttdqrRareTooEaiwdDEkp2eKlmPasJaN7OTwRqbYF6W6DRFjisRdqBeXP_t0GykG8HraxUZoe2QL0t0GgLHLYBSguqW9GlfupGO-9G-9yNdtGJpg260dRuNK0brVv-0LpV5lq3VaJ1WyXaeffHr12VMDIrpQVsKyYUvRn6HZtX6E_IHFdo7IibifOH1KN55cK3b43m1bJ42zdQoPIN81eXkuvnDhJq7Eg4GK0GpR-GGi8EQhkv2LhkRh_HjzCcLcORGc6iztjWZ036TWT9Js7-U4AYb-IIhDTUxDk6VOUPkG3ehV1h8YKeSUVB76nGIAj2ntgsVXpKbl2CgBdbY4UfTsM7J-EnTuNq_9ypgNAuOtH0QTfaKcVRPe6aPAfbEbXUVOuPluZHldlqOV4tak47DNvz1ztQpy202Ut6tzJP17vRjG60YQta1TtSXLGO6CGTz89BaDFeZDhVksgjuBLM1PLMgmqDdSV9Pkn6ePdq0OJsZiZp1DjmTFX8PUcJJYS8OObI8xY6NdA-t5qKnLLoQ-8sBVt-8YqoMQiYkixhMOwXSOdLZUGtzSZgO0egtweA1fPd99DSBLvlE6NbPjFOySfVs4bytKF23uDASp3gZ5deEdzI7z_AG86U3zpTeIqXN8xpCYK8Qy12k2PFKWj5z5uZwaiArOvtk6Z2aY5ay5UmUfTTKUZLimS8rdFWjynG14vFOE6xq8PN9oSGtjQf09yspmPLnrpwVUZ945pDj57smNeMQdb9YRu4GIEad6myl0nftNq-wHukCPMa0gHDEJEXqttCBVmUyOJo3jKGnXKE8akb7fyk1FIJcGGqA1I-98Yxuz1RGW2fqKTFZo1vLGfiWso4ioug9LN4ecByFDiXg-prezhovZ9BiN_g9TZTbFe43BiEKWarDa3EUqKHlPMyMe-OKbdNpbZlnOywLFj2cPNNEi0T7Lv0hh2ss8N4hbaFD6Ff4sw4pwgXrigsoTiQxMvcI0yc5V55rF6KK1qDBfe0O6A0QEsFq-rSpcI1qqjHm6km28TB31XK44u6nftHRu0Nv0XSNS4jSzUa3g9wgNCn9ohQkVMtG94JSGup3HHE4hk05NKh1gKjt8AYTZhtZPTOehucbrww6F32ftLmu17-CGvgrncJt-Dup7veGW-nf27huZWK8rQA1_4CepEEXo6nQZjHae-Stp_1vCKPl6_E710-eFGGS9Ak9CASNqL11_-INcE4">link</a>.</p>
+<h2 data-number="3.1" id="stop-the-talking-and-show-us-some-code"><span class="header-section-number">3.1</span> Stop the talking and show us some code!</h2>
+<h3 data-number="3.1.1" id="installation"><span class="header-section-number">3.1.1</span> Installation</h3>
+<p>Well, if you follow the manual, you will get there.</p>
+<p>At the time I tested things, only Ubuntu 18.04 was supported. Later versions will fail with a nf_conntrack issue, so you may need to run everything in a VM.</p>
+<p>Running things in a VM can also create problems, but more on that later.</p>
+<pre><code># Check if you have virtualization support
+sudo modprobe kvm
+lsmod | grep kvm
+
+# Check if you have AVX2 (a flavor of SIMD for floating point operations)
+egrep &quot;(avx2)&quot; /proc/cpuinfo
+
+# Check if you have virtualization instructions
+egrep &quot;(svm|vmx)&quot; /proc/cpuinfo
+
+# Don&#39;t even try to continue if one of the
+# previous checks didn&#39;t return something
+
+# Clone Riab
+git clone &quot;https://github.com/onosproject/sdran-in-a-box.git&quot;
+
+# Install Vagrant (VM manager) and the libvirt extension
+apt install vagrant qemu-kvm libvirt-daemon-system
+
+# Create a new Ubuntu 18.04 VM
+vagrant init &quot;generic/ubuntu1804&quot; # bionic64
+
+# Edit the vMemory and vCpus for the machine
+# If you use the emulated data-plane, use &gt;22GB of RAM
+#
+#  # -*- mode: ruby -*-
+#  # vi: set ft=ruby :
+#  Vagrant.configure(&quot;2&quot;) do |config|
+#    config.vm.box = &quot;generic/ubuntu1804&quot; #
+#    config.vm.synced_folder &quot;./&quot;, &quot;/vagrant&quot; # sync the local directory to the VM&#39;s /vagrant directory
+#    config.vm.provider &quot;libvirt&quot; do |vb|
+#      #vb.gui = true
+#      vb.cpus = 14
+#      vb.memory = &quot;21384&quot;
+#    end
+#    config.ssh.insert_key=false # passwordless login
+#  end
+
+# Start the VM
+vagrant up
+
+# Log into the VM
+vagrant ssh
+
+# Update packages
+sudo apt-get update
+sudo apt-get upgrade
+
+# Lock the kernel version. It might not be a problem on every cloud,
+# but it was on mine.
+sudo apt-mark hold linux-generic linux-image-generic linux-headers-generic
+
+# Install extra kernel modules (nf_conntrack)
+sudo apt install linux-modules-extra-*-generic
+sudo modprobe nf_conntrack
+sudo apt-get install make net-tools
+
+# Nagivate to the cloned SD-RAN-in-a-box directory
+cd /vagrant/sdran-in-a-box</code></pre>
+<p>Now, how do we do anything?</p>
+<h3 data-number="3.1.2" id="basic-helmkubernetes-background-information"><span class="header-section-number">3.1.2</span> Basic Helm/Kubernetes background information</h3>
+<p>I’m definitely not an specialist in SD-RAN, Kubernetes or ONOS, so it took some experimentation to get anything done.</p>
+<p><a href="https://helm.sh/docs/intro/using_helm/">Helm charts</a> are used as an encapsulation for kubernetes applications along which can be configured using templates for the different settings. It is just as bad as it sounds.</p>
+<p>Helm charts can have subdirectories, which are considered subdependencies and are installed recursively.</p>
+<p>A helm chart can be installed from a local repository (so you can work on a local clone)</p>
+<pre><code>helm install oai-enb-du sdran-in-a-box/workspace/sdran-helm-charts/oai-enb-du</code></pre>
+<p>The templated settings allow for the substitution of values via the command line or via yaml files (much preferred).</p>
+<pre><code>echo &#39;{
+ config.oai-enb-du.mode: &quot;nfapi&quot;,
+ config.oai-enb-du.radio.eutra_band: 42,
+ config.oai-enb-du.radio.rbs: 100,
+ config.oai-enb-du.radio.tx_gain: 90,
+ config.oai-enb-du.radio.rx_gain: 125,
+ config.oai-enb-du.radio.nb_antennas_rx: 2,
+ config.oai-enb-du.radio.nb_antennas_tx: 2
+}&#39; &gt; values.yaml
+helm install -f values.yaml oai-enb-du sdran-in-a-box/workspace/sdran-helm-charts/oai-enb-du</code></pre>
+<p>In this case, one of the templates in sdran-in-a-box/workspace/sdran-helm-charts/oai-enb-du/templates/*.tpl will have their field values replaced with those in the yaml settings file.</p>
+<p>For example, in the values file, we set "oai-enb-du.mode" to "nfapi", which will be processed by the following template:</p>
+<pre><code>{% raw %}{{ $duMode := index .Values &quot;config&quot; &quot;oai-enb-du&quot; &quot;mode&quot; }}{% endraw %}</code></pre>
+<p>and transformed into the following line</p>
+<pre><code>duMode := &quot;nfapi&quot;</code></pre>
+<p>The helm charts used by the SD-RAN-in-a-box are installed by the makefiles em sdran-in-a-box/mk, using the following commands</p>
+<pre><code>helm upgrade --install $(HELM_ARGS) \
+     --namespace $(RIAB_NAMESPACE) \
+     --values $(HELM_VALUES) \
+      ...</code></pre>
+<p>The values of HELM_VALUES are read from the default settings file sdran-in-a-box/sdran-in-a-box-values.yaml</p>
+<p>To install from your own sdran-helm-charts fork, replace the repository link in sdran-in-a-box/Makefile. To do that, search for</p>
+<pre><code>            $(ONOS_GITHUB_URL)/sdran-helm-charts</code></pre>
+<p>The clone is only done if the directory does not exist, so you can modify it directly, then commit and push changes later. Just remember to do that before running "make clean-all", otherwise the changes will be lost.</p>
+<h3 data-number="3.1.3" id="installing-riab-with-data-plane-emulation"><span class="header-section-number">3.1.3</span> Installing RIAB with data-plane emulation</h3>
+<p>If you do not have enough RAM, the VM or your computer will crash due to OOM.</p>
+<pre><code># Install RIAB with OAI emulation
+make OPT=oai
+
+# Execute tests to check if the data-plane is actually working
+# Tests are located in sdran-in-a-box/mk/test-cases
+# E2E tests using pings in the user data-plane
+make test-user-plane
+
+# E2E tests using iperf in the user data-plane
+make test-rsm-dataplane</code></pre>
+<p>Everything should be working now. You must be thinking on passing quite some traffic through that emulated network right now, but it isn’t that simple.</p>
+<p>At least on my computer, due to using a normal kernel (not the low-latency one), and due to low CPU clocks (1st gen Ryzen 1700), the synchronization between the UEs and the eNB is lost quite frequently. I remember looking at the ONF Slack channel for answers, but it was still being investigated.</p>
+<p>Due to that issue, I had to take everything down and up again, which took quite a lot of time. I tested the commands suggested by Woojoong Kim (I believe he is the lead developer for Riab), but didn’t really work for my specific case.</p>
+<pre><code># I only really use clean-all, because it always works. Beware: it is super slow and deletes everything
+
+# It deletes ONOS RIC services and RAN-Simulator but Kubernetes is still running
+make reset-test
+
+# Deletes Kubernetes environment; Eventually, all ONOS RIC and
+# RAN-Simulator are terminated; The Helm chart directory is not deleted
+
+make clean
+
+# Deletes everything, including the Kubernetes environment,
+# all componentes/PODs which RiaB deployed, and even the Helm chart directory
+
+make clean-all</code></pre>
+<h3 data-number="3.1.4" id="other-useful-commands"><span class="header-section-number">3.1.4</span> Other useful commands</h3>
+<p>Other useful commands I’ve learned while testing these.</p>
+<pre><code># Lists all kubernetes namespaces and services
+kubectl get po --all-namespaces
+
+# Lists kubernetes services in the riab namespace
+kubectl -n riab get pods
+
+# Lists the status of sd-ran
+helm -n riab status sd-ran
+
+# Lists all sd-ran settings
+helm -n riab get all sd-ran
+
+# Check the status of different pods running SD-RAN services
+watch kubectl -n riab get pods
+
+# Comand to get the kubernetes pod shell to access binaries
+kubectl -n riab exec -it $(kubectl -n riab get pods -l type=cli -o name) -- /bin/sh</code></pre>
+<h2 data-number="3.2" id="thats-enough-code.-now-show-us-something-interesting"><span class="header-section-number">3.2</span> That’s enough code. Now show us something interesting</h2>
+<p>I wish I had some banging xApps up and running... Maybe getting to work in real networks with people from Mavenir, Parallel, Radisys or Nokia...</p>
+<p>But in my excitement about this, I ended up talking too much and getting a ton of people wanting to get envolved, which ended up drastically slowing down the process.</p>
+<p>A few partners offered us their clouds, which I’m very grateful for, but they were quite up to the task of running real-time services. Some failed to setup Riab due to missing AVX2 instructions, others due to disabled smx/vmx instructions for security reasons, others had very slow drives which timed out some of the services and prevented Riab from getting setup. Even if they worked, I’m not sure their clocks and number of cores would be able to keep up with the emulated network.</p>
+<p>I also had my fair of issues trying to understand Helm packaging.</p>
+<p>The best I managed to do was adapt our in-house traffic injection tool, <a href="https://github.com/notopoloko/Eros">Eros</a>, and use it to <a href="https://github.com/Gabrielcarvfer/sdran-in-a-box/blob/work/inject_eros_traffic.py">inject</a> some network traffic and see how things behaved. We produced the Figure <a href="#fig:traffic-injection" data-reference-type="ref" data-reference="fig:traffic-injection">2</a>, showing the behavior of the UE downlink when streaming a MPEG DASH-like traffic from the remote serve.</p>
+<figure>
+<img src="/assets/img/2022-12-22-experimental-platforms-for-open-ran/traffic-injection-sdran.png" id="fig:traffic-injection" style="width:100.0%" alt="" /><figcaption>Traffic injection from the remote server to the UE using the emulated data-plane</figcaption>
+</figure>
+<h1 data-number="4" id="next-steps"><span class="header-section-number">4</span> Next steps</h1>
+<p>For now, I’ve stopped playing with SD-RAN and started focusing on my own O-RAN implementation for the ns-3 simulator.</p>
+<p>It is kind of sad that I decided to change course too late and missed the <a href="https://www.comsoc.org/publications/journals/ieee-jsac/cfp/open-ran-new-paradigm-open-virtualized-programmable-and">journal</a> I had in mind.</p>
+<p>Hopefully it will make it to the Brazilian Symposium of Computer Networks and Distributed Systems (SBRC), which funnily enough will be hosted by my alma mater, in the next year.</p>
+<p>The source code for my O-RAN module should be published in a month or so, before I finish the paper for the tools section of the SBRC. It still needs some refactoring to look decent.</p>
+<h1 class="unnumbered" data-number="" id="references">References</h1>
+<div id="refs" class="references hanging-indent" role="doc-bibliography">
+<div id="ref-Solis_2022">
+<p>Solis, Priscila, Gabriel C Ferreira, Raimundo Guimarães Saraiva Jr., and Paulo Henrique Portela de Carvalho. 2022. “Uma análise Do Open RAN E Os Desafios Da Sua Experimentação Em Plataformas de código Aberto.” In <em>Anais Do XL Simpósio Brasileiro de Telecomunicações E Processamento de Sinais</em>. Sociedade Brasileira de Telecomunicações. <a href="https://doi.org/10.14209/sbrt.2022.1570824548">https://doi.org/10.14209/sbrt.2022.1570824548</a>.</p>
+</div>
+</div>
