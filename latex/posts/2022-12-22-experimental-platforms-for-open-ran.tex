@@ -34,7 +34,7 @@
 \section{What do we need to get a working Open-RAN setup?}
 
     It isn't an official architecture diagram, but the diagram of the reference implementation
-    made by the \href{https://wiki.o-ran-sc.org/display/OAM/OAM+Architecture#OAMArchitecture-IntegrationintoSMO}{O-RAN Software Community (O-RAN SC)}.architecture
+    made by the \href{https://wiki.o-ran-sc.org/display/OAM/OAM+Architecture#OAMArchitecture-IntegrationintoSMO}{O-RAN Software Community (O-RAN SC)}.
     Figure \ref{fig:o-ran-sc-architecture} shows the main components of an O-RAN setup, which are:
     \begin{enumerate}
         \item the 3GPP core: 4G and 5G are supported in the O-RAN specifications (some companies are apparently adapting older networks too)
@@ -107,10 +107,10 @@
         If O-RAN really works and is set as a requirement in new spectrum auctions,
         they will certainly do it.
 
-    \subsection{Orchestration and management (O\&M) services}
+    \subsection{Service Management and Orquestration (SMO)}
         This is where things really start to get big and ugly.
 
-        We have great O\&M services such as \href{https://magmacore.org/}{Magma},
+        We have great SMO services such as \href{https://magmacore.org/}{Magma},
         which was started by Facebook, then moved to
         \href{https://telecominfraproject.com/}{Telecom Infrastructure Project (TIP)},
         and finally to Linux Foundation (stop moving the damned project around).
@@ -124,8 +124,8 @@
 
         \href{https://kubernetes.io/}{Kubernetes} on the other hand, seems to be the
         popular choice, since both \href{https://openairinterface.org/mosaic5g/}{Trirematics},
-        OAI's O\&M solution, and the \href{https://opennetworking.org/open-ran/}{SD-RAN},
-        ONF's O\&M solution, are based on Kubernetes.
+        OAI's SMO solution, and the \href{https://opennetworking.org/open-ran/}{SD-RAN},
+        ONF's SMO solution, are based on Kubernetes.
 
         All of the services are implemented as Virtualized Network Functions (VNFs),
         that are executed within containers. The containers are glued together by
@@ -401,7 +401,7 @@ kubectl -n riab exec -it $(kubectl -n riab get pods -l type=cli -o name) -- /bin
         networks with people from Mavenir, Parallel, Radisys or Nokia...
 
         But in my excitement about this, I ended up talking too much and getting a ton
-        of people wanting to get envolved, which ended up drastically slowing down the process.
+        of people wanting to get involved, which ended up drastically slowing down the process.
 
         A few partners offered us their clouds, which I'm very grateful for, but they were quite
         up to the task of running real-time services. Some failed to setup Riab due to missing AVX2
