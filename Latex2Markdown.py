@@ -117,9 +117,9 @@ def main():
 
     # Run jekyll to rebuild the site
     if not args.serve:
-        subprocess.check_output("bundle exec jekyll build".split(" "))
+        subprocess.check_output("bundler exec jekyll build".split(" "))
     else:
-        subprocess.check_output("bundle exec jekyll serve".split(" "))
+        subprocess.check_output("bundler exec jekyll serve".split(" "))
     print("We are done here")
 
 
