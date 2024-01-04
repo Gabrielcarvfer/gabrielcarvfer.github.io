@@ -36,6 +36,37 @@
 - title: Experience
   type: time_table
   contents:
+    - title: Researcher
+      institution: University of Brasília, Brasília, Brazil
+      year: 2024
+      description:
+        - title: Building xApps for QoS improvement as part of the RNP funded OpenRAN@Brasil project
+          contents:
+            - Network performance
+            - ML integration
+        - Implementing a xApp development framework for Open-RAN evaluation in simulated and emulated environments
+
+    - title: Researcher
+      institution: University of Brasília, Brasília, Brazil
+      year: 2023-2024
+      description:
+        - title: Studying and assembling an O-RAN testbed as part of the FAP-DF funded PLEDESIR project
+          contents:
+            - Network security
+            - Network management and orchestration
+            - ML integration
+        - Implementing emulation tools for Open-RAN evaluation
+
+    - title: Adjunct Professor (Professor Substituto)
+      institution: University of Brasília, Brasília, Brazil
+      year: 2023
+      description:
+        - Computer Algorithms and Programs (2023/2)
+        - Computer Networks (2023/2)
+        - Computer Algorithms and Programs (2023/1)
+        - Computer Networks (2023/1)
+        - Data Structures (2023/1)
+
     - title: Volunteer Professor
       institution: University of Brasília, Brasília, Brazil
       year: 2022 - 2023
