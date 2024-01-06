@@ -177,6 +177,9 @@
           {%- if entry.website %}
             <a href="{{ entry.website }}" class="btn btn-sm z-depth-0" role="button">Website</a>
           {%- endif %}
+          {%- if entry.howpublished %}
+            <a href="{{ entry.howpublished }}" class="btn btn-sm z-depth-0" role="button">Link</a>
+          {%- endif %}
           {%- if entry.doi %}
             doi:<a href="http://dx.doi.org/{{entry.doi}}">{{entry.doi}}</a>
           {%- endif %}
