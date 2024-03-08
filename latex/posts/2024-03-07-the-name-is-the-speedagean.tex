@@ -428,7 +428,7 @@ simulation speedup, or 4.8x speedup in that particular function.
 Still working on other smaller optimizations,
 but nothing will ever be as significant as these ones.
 
-Unless we go to more challenging scenarios, which we did.
+Unless we go to more challenging scenarios... which we did.
 
 \section{Absurd MIMO settings in cttc-nr-mimo-demo}
 
@@ -440,7 +440,7 @@ In this section, we will be using the following configuration:
 \end{itemize}
 
 Our client and my boss said these settings are not representative, but like
-I said, I am not specialist in MIMO, so these don't have to be representative
+I said, I am no specialist in MIMO, so these don't have to be representative
 at all for the work I am doing. Since they are so extreme, they help to point out
 where the code scales badly in the new MIMO feature. And in the 2024 MWC, there
 were apparently radios with 256 ports for 6G...
@@ -449,8 +449,8 @@ So we better get this scaling well to be future-proof.
 These number of ports mean that our $O(n^5)$ is already in the range of $O(1024*n^3)$.
 So whatever we do, we must do as cheaply as possible inside that loop.
 
-After profiling the code again, we saw the unthinkable: the MIMO codebook search
-took 82\% of the total simulation time.
+But first, we need to perform the profiling again... And we saw the unthinkable:
+the MIMO codebook search took 82\% of the total simulation time.
 
 More on that in the next section.
 
@@ -466,13 +466,13 @@ wideband $i_1$ index from the channel average, and I did it. With these
 two, we can skip the vast majority of the search space, and focus on finding
 subband $i_2$ indices.
 
-The full search complexity is $O(nRanks*nI1s*nSubBands*nI2s)$,
-which we could say is close to $O(n^4)$ in search space shape. The nI1s and nSubBands
+The full search complexity is $O(nRanks*nI1s*nSubBands*nI2s*nPortsReceiver*nPortsSender)$,
+which we could say is bound by $O(n^6)$ a search space. The nI1s and nSubBands
 can be extremely large numbers.
 
 After reordering operations, we get a fast search with
-$O(nSubBands+1+nI1s*nI2s+nSubBands*nI2s)$, which is close to
-$O(n^2)$ in search space shape.
+$O(nPortsReceiver*nPortsSender(nSubBands+1+nI1s*nI2s+nSubBands*nI2s))$,
+which is bound by a $O(n^4)$ search space.
 
 The results are as amazing as this sounds, as can be seen in the
 before \ref{fig:search-fast-before} and after \ref{fig:search-fast-after} Figures.

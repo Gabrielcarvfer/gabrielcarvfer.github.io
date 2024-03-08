@@ -219,22 +219,22 @@ LteRlcUm::DoNotifyTxOpportunity(LteMacSapUser::TxOpportunityParameters txOpParam
 </figure>
 <h2 data-number="2.6" id="and-there-is-more..."><span class="header-section-number">2.6</span> And there is more...</h2>
 <p>Still working on other smaller optimizations, but nothing will ever be as significant as these ones.</p>
-<p>Unless we go to more challenging scenarios, which we did.</p>
+<p>Unless we go to more challenging scenarios... which we did.</p>
 <h1 data-number="3" id="absurd-mimo-settings-in-cttc-nr-mimo-demo"><span class="header-section-number">3</span> Absurd MIMO settings in cttc-nr-mimo-demo</h1>
 <p>In this section, we will be using the following configuration:</p>
 <ul>
 <li><p>gNB with 2x32 antenna array, 2x8 ports, dual polarized (total of 32 ports)</p></li>
 <li><p>UE with 2x8 antenna array, 2x8 ports, dual polarized (total of 32 ports)</p></li>
 </ul>
-<p>Our client and my boss said these settings are not representative, but like I said, I am not specialist in MIMO, so these don’t have to be representative at all for the work I am doing. Since they are so extreme, they help to point out where the code scales badly in the new MIMO feature. And in the 2024 MWC, there were apparently radios with 256 ports for 6G... So we better get this scaling well to be future-proof.</p>
+<p>Our client and my boss said these settings are not representative, but like I said, I am no specialist in MIMO, so these don’t have to be representative at all for the work I am doing. Since they are so extreme, they help to point out where the code scales badly in the new MIMO feature. And in the 2024 MWC, there were apparently radios with 256 ports for 6G... So we better get this scaling well to be future-proof.</p>
 <p>These number of ports mean that our <span class="math inline">\(O(n^5)\)</span> is already in the range of <span class="math inline">\(O(1024*n^3)\)</span>. So whatever we do, we must do as cheaply as possible inside that loop.</p>
-<p>After profiling the code again, we saw the unthinkable: the MIMO codebook search took 82% of the total simulation time.</p>
+<p>But first, we need to perform the profiling again... And we saw the unthinkable: the MIMO codebook search took 82% of the total simulation time.</p>
 <p>More on that in the next section.</p>
 <h2 data-number="3.1" id="exhaustive-search-can-be-optimal-but-it-is-very-exhausting"><span class="header-section-number">3.1</span> Exhaustive search can be optimal, but it is very exhausting</h2>
 <p>In the case of MIMO codebook search, the exhaustive PMI search implemented by NrPmSearchFull is extremely slow because the search space is very big.</p>
 <p>I spent two weeks trying to understand how on earth MIMO works, and I got some very superficial understanding, that was enough to identify what we could do. My boss then said we could extract the rank and search the wideband <span class="math inline">\(i_1\)</span> index from the channel average, and I did it. With these two, we can skip the vast majority of the search space, and focus on finding subband <span class="math inline">\(i_2\)</span> indices.</p>
-<p>The full search complexity is <span class="math inline">\(O(nRanks*nI1s*nSubBands*nI2s)\)</span>, which we could say is close to <span class="math inline">\(O(n^4)\)</span> in search space shape. The nI1s and nSubBands can be extremely large numbers.</p>
-<p>After reordering operations, we get a fast search with <span class="math inline">\(O(nSubBands+1+nI1s*nI2s+nSubBands*nI2s)\)</span>, which is close to <span class="math inline">\(O(n^2)\)</span> in search space shape.</p>
+<p>The full search complexity is <span class="math inline">\(O(nRanks*nI1s*nSubBands*nI2s*nPortsReceiver*nPortsSender)\)</span>, which we could say is bound by <span class="math inline">\(O(n^6)\)</span> a search space. The nI1s and nSubBands can be extremely large numbers.</p>
+<p>After reordering operations, we get a fast search with <span class="math inline">\(O(nPortsReceiver*nPortsSender(nSubBands+1+nI1s*nI2s+nSubBands*nI2s))\)</span>, which is bound by a <span class="math inline">\(O(n^4)\)</span> search space.</p>
 <p>The results are as amazing as this sounds, as can be seen in the before <a href="#fig:search-fast-before" data-reference-type="ref" data-reference="fig:search-fast-before">13</a> and after <a href="#fig:search-fast-after" data-reference-type="ref" data-reference="fig:search-fast-after">14</a> Figures.</p>
 <p>5x total simulation speedup, and 25x faster CreateCqiFeedbackMimo.</p>
 <figure>
